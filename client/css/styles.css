@@ -1,0 +1,53 @@
+* {
+    -webkit-border-radius: 0 !important;
+    -moz-border-radius: 0 !important;
+    border-radius: 0 !important;
+    font-family: calibri;
+}
+.strike span {
+    text-decoration: line-through;
+    color: #ccc;
+}
+.pokerplanners {
+    padding: 20px;
+}
+.pokerplanner {
+    padding: 10px;
+    font-size: 21px;
+    border-bottom: 1px solid;
+}
+.pokerplanner .btn {
+    margin-left: 5px;
+    width: 72px;
+}
+.pokerplanner:hover {
+    background: #e7e7e7;
+}
+@media (max-width: 991px) {
+    .pokerplanner .btn {
+        margin-bottom: 10px;
+    }
+    .pokerplanner input[type=checkbox] {
+        width: 25px;
+        height: 25px;
+    }
+}
+@media (max-width: 991px) {
+    .pokerplanner .btn-warning {
+        margin-top: 10px;
+        margin-left: 0px
+    }
+}
+
+@media (max-width: 450px) {
+    .pokerplanner .col-xs-8 {
+        width: 85%;
+    }
+    .pokerplanner .col-xs-3 {
+        width: 100%;
+        text-align: center;
+        border-top: 1px dashed #aaa;
+        padding-top: 10px;
+        margin-top: 10px;
+    }
+}
