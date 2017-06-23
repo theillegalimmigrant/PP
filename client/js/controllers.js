@@ -7,7 +7,13 @@ pokerplannerApp.controller('PokerplannerCtrl', function($rootScope, $scope, poke
   pokerplannersFactory.getPokerplanners().then(function(data) {
     $scope.pokerplanners = data.data;
   });
- 
+
+  pokerplannersFactory.getRooms().then(function(data) {
+    $scope.rooms = data.data;
+  });
+
+
+
   // Save a Pokerplanner to the server
   $scope.save = function($event) {
     if ($event.which == 13 && $scope.pokerplannerInput) {
@@ -19,6 +25,13 @@ pokerplannerApp.controller('PokerplannerCtrl', function($rootScope, $scope, poke
         $scope.pokerplanners.push(data.data);
       });
       $scope.pokerplannerInput = '';
+    } else if ($event.which == 13 && $scope.nameInput) {
+          pokerplannersFactory.savePokerplanner({
+            "name": $scope.nameInput
+          }).then(function(data) {
+            $scope.users.push(data.data);
+          });
+          $scope.nameInput = '';
     }
   };
  

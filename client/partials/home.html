@@ -1,0 +1,15 @@
+<div class="container" ng-controller="PokerplannerCtrl">
+    <div class="row col-md-12">
+        <div>
+            <input type="text" class="form-control input-lg" placeholder="Enter a Name" ng-keypress="save($event)" ng-model="nameInput">
+        </div>
+    </div>
+    <div class="row col-md-12 ">
+        <div class="text-center pokerplanners">
+            <a ng-href="#!/roomSetup/ " type="button" class="btn btn-primary btn-lg btn-block">New</a>
+        </div>
+        <div class="text-center pokerplanners">
+            <a ng-href="#!/rooms/ "type="button" class="btn btn-success btn-lg btn-block">Join</a>
+        </div>
+    </div>
+</div>
