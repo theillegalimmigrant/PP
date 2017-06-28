@@ -1,27 +1,44 @@
-<div class="container" ng-controller="PokerplannerCtrl">
+<div class="container " ng-controller="RoomSetupCtrl">
     <div class="row col-md-12">
         <div>
-            <input type="text" class="form-control input-lg" placeholder="Enter a Pokerplanner" ng-keypress="save($event)" ng-model="pokerplannerInput">
+            <h3>Room Name:</h3>
+            <input type="text" class="form-control input-lg" placeholder="Enter a Room Name" ng-model="roomNameInput">
         </div>
     </div>
-    <div class="row col-md-12 pokerplanners">
-        <div class="alert alert-info text-center" ng-hide="pokerplanners.length > 0">
-            <h3>No Pokerplanners yet!</h3>
+    <div ng-show="roomNameInput">
+        <div class="row col-md-12">
+                <h3>Add a New Task: </h3>
+                <input type="text" class="input-lg" placeholder="Task ID" ng-keypress="newTask($event)" ng-model="taskInput">
+                <input type="text" class="input-lg" placeholder="Task Description" ng-keypress="newTask($event)" ng-model="taskDescInput">
         </div>
-        <div ng-repeat="pokerplanner in pokerplanners" class="pokerplanner col-md-12 col-sm-12 col-xs-12" ng-class="pokerplanner.isCompleted ? 'strike' : ''">
-            <div class="col-md-1 col-sm-1 col-xs-1">
-                <input type="checkbox" ng-checked="pokerplanner.isCompleted" ng-click="updateStatus($event, pokerplanner._id, $index)">
+        <div class="row col-md-12 pokerplanners">
+            <div class="alert alert-info text-center" ng-hide="room.jiras.length > 0">
+                <h3>No Jiras yet!</h3>
             </div>
-            <div class="col-md-8 col-sm-8 col-xs-8">
-                <span ng-show="!isEditable[$index]">{{pokerplanner.pokerplanner}}</span>
-                <input ng-show="isEditable[$index]" type="text" value="{{pokerplanner.pokerplanner}}" ng-keypress="edit($event,$index);">
-                <input ng-show="isEditable[$index]" type="button" class="btn btn-warning" value="Cancel" ng-click="isEditable[$index] = false" />
+            <h3>Existing Tasks:</h3>
+            <div ng-repeat="jira in room.jiras" class="task col-md-12 col-sm-12 col-xs-12">
+                <div class="col-md-8 col-sm-8 col-xs-8">
+                    <span ng-show="!isEditable[$index]">{{jira.jiraId}} - {{jira.description}}</span>
+                    <input ng-show="isEditable[$index]" type="text" ng-model="taskEditInput[$index]">
+                    <input ng-show="isEditable[$index]" type="text" ng-model="taskDescEditInput[$index]">
+                    <input ng-show="isEditable[$index]" type="button" class="btn btn-success" value="Done" ng-click="editTask($index)" />
+                    <input ng-show="isEditable[$index]" type="button" class="btn btn-warning" value="Cancel" ng-click="isEditable[$index] = false" />
+                </div>
+                <div class="col-md-3 col-sm-3 col-xs-3">
+                    <input type="button" class="btn btn-info" class="pull-right" value="Edit" ng-click="isEditable[$index] = true" />
+                    <input type="button" class="btn btn-danger" class="pull-right" value="Delete" ng-click="delete($index)" />
+                </div>
+                <hl></hl>
             </div>
-            <div class="col-md-3 col-sm-3 col-xs-3">
-                <input type="button" class="btn btn-info" ng-disabled="pokerplanner.isCompleted" class="pull-right" value="Edit" ng-click="isEditable[$index] = true" />
-                <input type="button" class="btn btn-danger" class="pull-right" value="Delete" ng-click="delete($index)" />
-            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-6">
+            <button class="btn btn-primary btn-lg" ng-click="saveRoom()">Save</button>
+        </div>
+        <div class="col-md-6 text-right">
+            <a ng-href="#!/{{room._id}}" class="btn btn-success btn-lg" ng-click="saveRoom()">Start</a>
+        </div>
 
-        </div>
     </div>
 </div>

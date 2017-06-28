@@ -1,0 +1,16 @@
+<div class="container" ng-controller="RoomsCtrl">
+    <div class="row col-md-12">
+        <div>
+            <h3>Please choose a room to join:</h3>
+        </div>
+    </div>
+    <div class="row col-md-12 pokerplanners">
+        <div class="alert alert-info text-center" ng-hide="rooms.length > 0">
+            <h3>No Rooms yet!</h3>
+        </div>
+        <div ng-repeat="room in rooms" class="pokerplanners col-md-12 col-sm-12 col-xs-12">
+            <a type="button" class="btn btn-primary btn-lg btn-block" ng-href="#!/setup/{{room._id}}" ng-click="setRoom($index)">{{room._id}}</a>
+        </div>
+    </div>
+
+</div>

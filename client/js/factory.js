@@ -1,33 +1,52 @@
-pokerplannerApp.factory('pokerplannersFactory', function($http) {
-  var urlBase = '/api/pokerplanner';
-  var urlName = '/api/name'
-  var _pokerplannerService = {};
- 
-  _pokerplannerService.getPokerplanners = function() {
-    return $http.get(urlBase);
+pokerplannerApp.factory('mongodbFactory', mongodbFactory);
+
+function mongodbFactory($http) {
+
+var urls = {
+      urlRooms: '/api/rooms',
+      urlRoom: '/api/room',
+      urlUser: '/api/users',
+
+      urlTest: '/api/test'
+  }
+
+  var service = {
+    getRooms: getRooms,
+    getRoom: getRoom,
+    getUsers: getUsers,
+    saveRoom: saveRoom,
+    findOrCreateUser: findOrCreateUser,
+    updateRoom: updateRoom,
+    deleteRoom: deleteRoom,
+    urls: urls
+  };
+  return service;
+
+  function getRooms() {
+    return $http.get(this.urls.urlRooms);
   };
 
-  _pokerplannerService.savePokerplanner = function(pokerplanner) {
-    return $http.post(urlBase, pokerplanner);
+  function getRoom(id) {
+    return $http.get(this.urls.urlRoom, {params:{"id":id}});
   };
 
-  _pokerplannerService.saveName = function(name) {
-      return $http.post(urlName, name);
+  function getUsers() {
+    return $http.get(this.urls.urlUser);
+  };
+
+  function saveRoom(room) {
+    return $http.post(this.urls.urlRooms, room);
+  };
+
+  function findOrCreateUser(user) {
+      return $http.post(this.urls.urlUser, user);
     };
- 
-  _pokerplannerService.updatePokerplanner = function(pokerplanner) {
-    return $http.put(urlBase, pokerplanner);
-  };
- 
-  _pokerplannerService.deletePokerplanner = function(id) {
-    return $http.delete(urlBase + '/' + id);
+
+  function updateRoom(room) {
+    return $http.put(this.urls.urlTest, room);
   };
 
-  _pokerplannerService.getRooms = function() {
-    return $http.get(urlBase);
+  function deleteRoom(id) {
+    return $http.delete(this.urls.urlRooms + '/' + id);
   };
-
-
-
-  return _pokerplannerService;
-});
+};

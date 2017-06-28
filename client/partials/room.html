@@ -1,0 +1,14 @@
+<div class="container" ng-controller="RoomCtrl">
+    <div class="row col-md-12">
+        <h1>{{room.name}}</h1>
+        <h4>{{room.leader}}</h4>
+        <h2> {{task.jiraId}}: {{task.description}}</h2>
+    </div>
+    <div class="col-md-12">
+        <div class="text-center" ng-repeat="card in cards">
+            <div class="col-xs-2">
+                <button>{{card.display}}</button>
+            </div>
+        </div>
+    </div>
+</div>
