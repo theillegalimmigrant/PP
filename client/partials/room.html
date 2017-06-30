@@ -1,14 +1,52 @@
-<div class="container" ng-controller="RoomCtrl">
-    <div class="row col-md-12">
-        <h1>{{room.name}}</h1>
-        <h4>{{room.leader}}</h4>
-        <h2> {{task.jiraId}}: {{task.description}}</h2>
-    </div>
+<div class="container">
     <div class="col-md-12">
-        <div class="text-center" ng-repeat="card in cards">
-            <div class="col-xs-2">
-                <button>{{card.display}}</button>
+        <div class="col-md-9">
+            <h1>{{room.name}}</h1>
+            <h4>{{room.leader}}</h4>
+            <h2> {{task.jiraId}}: {{task.description}}</h2>
+        </div>
+        <div class="col-md-3">
+            <h2>Time</h2>
+            <h2>Round: {{round}}</h2>
+        </div>
+
+        <div class="col-md-9">
+            <div class="well col-md-12">
+                <ul>
+                    <li ng-repeat="player in players track by $index">
+
+                        <div class="col-md-6">{{player}} -> </div>
+                        <div class="col-md-6" ng-show="findPlayerEstimate(player)">{{findPlayerEstimate(player)}}</div>
+                        <div class="col-md-6" ng-hide="findPlayerEstimate(player)">{Hidden}</div>
+
+                    </li>
+                </ul>
             </div>
+            <div class="col-md-12" ng-show="showDeck">
+                <div class="text-center" ng-repeat="card in cards">
+                    <div class="col-xs-2">
+                        <button ng-click="sendEstimate($index)">{{card.display}}</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3" ng-show="$root.nameInput===room.leader">
+            <div ng-repeat="jira in room.jiras">
+                <div class="col-md-12">
+                    <div class="btn col-md-12 task" ng-click="changeTask($index)">{{jira.jiraId}}-{{jira.description}}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3" ng-hide="$root.nameInput===room.leader">
+            <div ng-repeat="jira in room.jiras">
+                <div class="col-md-12">
+                    <a class=" col-md-12 btn-primary btn-lg">{{jira.jiraId}}-{{jira.description}}</a>
+                </div>
+            </div>
+        </div>
+        <div ng-show="$root.nameInput===room.leader" class="col-md-12">
+            <button>Replay</button>
+            <button>Confirm</button>
         </div>
     </div>
 </div>

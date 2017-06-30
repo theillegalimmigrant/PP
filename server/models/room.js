@@ -8,7 +8,7 @@ var roomSchema = new Schema({
             jiraId: String,
             description: String,
             estimates: [{estimate: Number, round: Number, user: String}],
-            notes: [{note: String, user: String, timestamp: Date}]
+            notes: [{note: String, timestamp: Date}]
             }]
 
 });
