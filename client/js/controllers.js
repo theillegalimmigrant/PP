@@ -92,12 +92,8 @@ pokerplannerApp.controller('RoomSetupCtrl',function ($rootScope, $scope,$routePa
 
 pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams,mongodbFactory) {
 
-    $scope.round=1;
     $scope.focusIndex=0;
-    $scope.showDeck=1;
     $scope.players = [];
-    $scope.estimates= [];
-    $scope.notes = [];
     $scope.cards = [
         { value: 0, display: '0' },
         { value: 1, display: '1' },
@@ -112,6 +108,8 @@ pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams
         { value: 999, display: '∞' },
         { value: 999, display: '?' }
     ];
+
+    newTask();
 
     // get all room on Load
     mongodbFactory.getRoom($routeParams.id).then(function(data) {
@@ -168,19 +166,14 @@ pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams
                     $scope.show = true;
                     break;
                 case 'replay':
-                    $scope.show = '';
-                    $scope.estimates= [];
+                    newRound();
                     $scope.round++;
                     // save estimates to mongodb
                     break;
                 case 'endTask':
                     // save estimates
-                    $scope.show = '';
-                    $scope.estimates= [];
-                    $scope.round = 1;
-                    if ($scope.focusIndex === $scope.room.jiras.length-1) {
-                        //end story
-                    } else {
+                    newTask();
+                    if ($scope.focusIndex < $scope.room.jiras.length-1) {
                         $scope.focusIndex++;
                         $scope.task = $scope.room.jiras[$scope.focusIndex];
                     }
@@ -188,9 +181,7 @@ pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams
                 default:
             }
         } else if (json.type = 'task') {
-            $scope.show = '';
-            $scope.estimates= [];
-            $scope.round = 1;
+            reset();
             $scope.focusIndex = json.data;
             $scope.task = $scope.room.jiras[$scope.focusIndex];
         } else if (json.type === 'note') {
@@ -199,27 +190,19 @@ pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams
             console.log('Hmm..., I\'ve never seen JSON like this: ', json);
         }
     };
-//        switch (message.type) {
-//              case est: // get player estimates and broadcast
-//              case leaderMsg: // the leader messages that influence estimates: reveal, replay, endTask, nextTask, prevTask, notes
-// reveal shows all cards
-// replay increments round and resets player estimates
-// endTask averages the final estimates, moves to next task
-// nextTask moves to nextTask - resets estimates
-// prevTask goes to prev task
-// notes displays notes to all players and persists notes
-//              case notes:
-//              default:
-//          }
+
     $scope.findPlayerEstimate = function (player) {
         for (var i=0; i<$scope.estimates.length; i++) {
             if (player === $scope.estimates[i].user) {
-                return $scope.cards[$scope.estimates[i].estIndex].display;
+                if ($scope.show || player===$rootScope.nameInput) {
+                    return $scope.cards[$scope.estimates[i].estIndex].display;
+                }
             }
         }
     };
 
     $scope.sendEstimate = function(i) {
+        $scope.showDeck = false;
         var header = 'est:>';
         var est = { user: $rootScope.nameInput, estIndex: i };
         connection.send(header+JSON.stringify(est));
@@ -230,7 +213,23 @@ pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams
         $scope.task = $scope.room.jiras[$scope.focusIndex];
     };
 
+    $scope.sendCmd=function(msg) {
+        var header = 'cmd:>';
+        connection.send(header+msg);
+    };
 
+    function newTask() {
+        $scope.round=1;
+        $scope.showDeck=true;
+        $scope.show = false;
+        $scope.estimates= [];
+        $scope.notes = [];
+    };
 
+    function newRound() {
+        $scope.showDeck=true;
+        $scope.show = false;
+        $scope.estimates= [];
+    };
 });
 

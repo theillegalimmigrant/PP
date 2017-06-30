@@ -10,7 +10,7 @@
             <h2>Round: {{round}}</h2>
         </div>
 
-        <div class="col-md-9">
+        <div class="col-md-8">
             <div class="well col-md-12">
                 <ul>
                     <li ng-repeat="player in players track by $index">
@@ -24,29 +24,23 @@
             </div>
             <div class="col-md-12" ng-show="showDeck">
                 <div class="text-center" ng-repeat="card in cards">
-                    <div class="col-xs-2">
-                        <button ng-click="sendEstimate($index)">{{card.display}}</button>
-                    </div>
+                    <button class="btn-primary col-xs-2" ng-click="sendEstimate($index)">{{card.display}}</button>
                 </div>
             </div>
         </div>
-        <div class="col-md-3" ng-show="$root.nameInput===room.leader">
+        <div class="col-md-4" >
             <div ng-repeat="jira in room.jiras">
                 <div class="col-md-12">
-                    <div class="btn col-md-12 task" ng-click="changeTask($index)">{{jira.jiraId}}-{{jira.description}}</div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3" ng-hide="$root.nameInput===room.leader">
-            <div ng-repeat="jira in room.jiras">
-                <div class="col-md-12">
-                    <a class=" col-md-12 btn-primary btn-lg">{{jira.jiraId}}-{{jira.description}}</a>
+                    <button class="btn btn-primary btn-md col-md-12" ng-show="$root.nameInput===room.leader" ng-click="changeTask($index)">{{jira.jiraId}}-{{jira.description}}</button>
+                    <div class="col-md-12 task"ng-hide="$root.nameInput===room.leader"  >{{jira.jiraId}}-{{jira.description}}</div>
                 </div>
             </div>
         </div>
         <div ng-show="$root.nameInput===room.leader" class="col-md-12">
-            <button>Replay</button>
-            <button>Confirm</button>
+            <button class="btn btn-primary btn-lg col-md-4" ng-click="sendCmd('reveal')">Reveal</button>
+            <button class="btn btn-primary btn-lg col-md-4" ng-click="sendCmd('replay')">Replay</button>
+            <button class="btn btn-primary btn-lg col-md-4" ng-click="sendCmd('endTask')">Confirm</button>
+            <input class=" col-md-12">
         </div>
     </div>
 </div>
