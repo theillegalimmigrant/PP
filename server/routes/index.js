@@ -40,17 +40,43 @@
     });
   });
 
-  router.put('/api/test', function(req, res) {
+  router.put('/api/room', function(req, res) {
 
-    Room.update({"_id": req.body._id},{$set: {  leader: req.body.leader, name: req.body.name, jiras: req.body.jiras }}, function(err, data){
+    Room.update({"_id": req.body._id},{$set: {  leader: req.body.leader, name: req.body.name, jiras: req.body.jiras, confirmed: req.body.confirmed }}, function(err, data){
         if (err) {
             res.json(err);
         } else {
             res.json(data);
         }
     });
-
   });
+
+  router.put('/api/note', function(req, res) {
+    Room.findOne({'_id': req.body.roomIndex},function(err,room){
+        room.jiras[req.body.jiraIndex].notes.push(req.body.note);
+        room.save();
+    });
+  });
+
+  router.get('/api/note', function(req, res) {
+    Room.findOne({'_id': req.body.roomIndex},function(err,room){
+        res.json(room.jiras[req.body.jiraIndex].notes);
+    });
+  });
+
+  router.put('/api/estimates', function(req, res) {
+    Room.findOne({'_id': req.body.roomIndex},function(err,room){
+        room.jiras[req.body.jiraIndex].estimates.push(req.body.estimate);
+        room.save();
+    });
+  });
+
+    router.put('/api/taskestimates', function(req, res) {
+      Room.findOne({'_id': req.body.roomIndex},function(err,room){
+          room.jiras[req.body.jiraIndex].confirmed = req.body.confirmedEstimate;
+          room.save();
+      });
+    });
 
   router.delete('/api/rooms/:_id', function(req, res) {
     db.room.remove({

@@ -3,11 +3,11 @@
         <div class="col-md-9">
             <h1>{{room.name}}</h1>
             <h4>{{room.leader}}</h4>
-            <h2> {{task.jiraId}}: {{task.description}}</h2>
+            <h2> {{jiraId}}: {{description}}</h2>
         </div>
         <div class="col-md-3">
-            <h2>Time</h2>
             <h2>Round: {{round}}</h2>
+            <h2>Current Estimate: {{currEstimate}}</h2>
         </div>
 
         <div class="col-md-8">
@@ -17,7 +17,6 @@
 
                         <div class="col-md-6">{{player}} -> </div>
                         <div class="col-md-6" ng-show="findPlayerEstimate(player)">{{findPlayerEstimate(player)}}</div>
-                        <div class="col-md-6" ng-hide="findPlayerEstimate(player)">{Hidden}</div>
 
                     </li>
                 </ul>
@@ -36,11 +35,16 @@
                 </div>
             </div>
         </div>
+        <div class="col-md-12  pre-scrollable">
+            <div class="col-md-12" ng-repeat="note in notes">
+                <div>{{note.timestamp}}: {{note.note}}</div>
+            </div>
+        </div>
         <div ng-show="$root.nameInput===room.leader" class="col-md-12">
             <button class="btn btn-primary btn-lg col-md-4" ng-click="sendCmd('reveal')">Reveal</button>
             <button class="btn btn-primary btn-lg col-md-4" ng-click="sendCmd('replay')">Replay</button>
             <button class="btn btn-primary btn-lg col-md-4" ng-click="sendCmd('endTask')">Confirm</button>
-            <input class=" col-md-12">
+            <input type="text" class="col-md-12 input-md" placeholder="Enter a task notes here" ng-keypress="sendNotes($event)" ng-model="noteInput">
         </div>
     </div>
 </div>

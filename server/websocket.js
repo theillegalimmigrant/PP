@@ -71,7 +71,7 @@
             // first message sent by user is their name
             // log and broadcast the message
                 console.log((new Date()) + ' Received Message from ' + userNames[index] + ': ' + message.utf8Data);
-
+                var data = '';
                 if (message.utf8Data.indexOf("user:>") === 0) {
                     console.log("Adding user: "+message.utf8Data.slice(6));
                     userNames.push(message.utf8Data.slice(6));
@@ -85,44 +85,42 @@
                     broadcast('users',userNames);
                 } else if (message.utf8Data.indexOf("est:>") === 0) {
                     console.log("Received an estimate");
-                    var data = JSON.parse(message.utf8Data.slice(5))
+                    data = JSON.parse(message.utf8Data.slice(5));
                     broadcast('est',data);
                 } else if (message.utf8Data.indexOf("cmd:>") === 0) {
                     console.log("Received a command");
                     broadcast('cmd',message.utf8Data.slice(5));
                 } else if (message.utf8Data.indexOf("note:>") === 0) {
                     console.log("Received a note");
-                    var data = { note: message.utf8Data.slice(6), timestamp: new Date()};
-                    broadcast('note',data);
+                    broadcast('note',JSON.parse(message.utf8Data.slice(6)));
                 } else if (message.utf8Data.indexOf("task:>") === 0) {
                     console.log("Received a task change");
-                    var data = message.utf8Data.slice(6);
+                    data = message.utf8Data.slice(6);
                     broadcast('task',data);
                 } else {
-                }
                     console.log("Unrecognised message format: " + message.utf8Data);
                 }
             }
           });
         // user disconnected
         connection.on('close', function(connection) {
-        if (userNames[index] !== '') {
-            console.log((new Date()) + " Peer " + connection.remoteAddress + " disconnected.");
-            console.log("Removing user: "+userNames[index]);
-            // remove user from the list of connected clients
-            clients.splice(index, 1);
-            userNames.splice(index,1);
-            var json = JSON.stringify({ type:'users', data: userNames });
-            for (var i=0; i < clients.length; i++) {
-                clients[i].sendUTF(json);
-            }
+            if (userNames[index] !== '') {
+                console.log((new Date()) + " Peer " + connection.remoteAddress + " disconnected.");
+                console.log("Removing user: "+userNames[index]);
+                // remove user from the list of connected clients
+                clients.splice(index, 1);
+                userNames.splice(index,1);
+                var json = JSON.stringify({ type:'users', data: userNames });
+                for (var i=0; i < clients.length; i++) {
+                    clients[i].sendUTF(json);
+                }
 
                 var debugMsg = 'Current Users: ';
-                for (var i=0; i < userNames.length; i++) {
+                for (i=0; i < userNames.length; i++) {
                   debugMsg = debugMsg + userNames[i] + ', ';
                 }
                 console.log(debugMsg);
-        }
+            }
         });
     });
 }());

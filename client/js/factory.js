@@ -6,8 +6,9 @@ function mongodbFactory($http) {
       urlRooms: '/api/rooms',
       urlRoom: '/api/room',
       urlUser: '/api/users',
-
-      urlTest: '/api/test'
+      urlEstimate: 'api/estimates',
+      urlNote: 'api/note',
+      urlTaskEstimate: 'api/taskestimate'
   };
 
   var service = {
@@ -18,6 +19,10 @@ function mongodbFactory($http) {
     findOrCreateUser: findOrCreateUser,
     updateRoom: updateRoom,
     deleteRoom: deleteRoom,
+    saveEstimate: saveEstimate,
+    saveNote: saveNote,
+    getNotes: getNotes,
+    saveTaskEstimate: saveTaskEstimate,
     urls: urls
   };
   return service;
@@ -43,7 +48,23 @@ function mongodbFactory($http) {
   }
 
   function updateRoom(room) {
-    return $http.put(this.urls.urlTest, room);
+    return $http.put(this.urls.urlRoom, room);
+  }
+
+  function saveEstimate(obj) {
+    return $http.put(this.urls.urlEstimate, obj);
+  }
+
+  function saveTaskEstimate(obj) {
+    return $http.put(this.urls.urlTaskEstimate, obj);
+  }
+
+  function saveNote(obj) {
+    return $http.put(this.urls.urlNote, obj);
+  }
+
+  function getNotes(obj) {
+    return $http.get(this.urls.urlNote, obj);
   }
 
   function deleteRoom(id) {

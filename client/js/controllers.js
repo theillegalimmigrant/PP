@@ -51,6 +51,7 @@ pokerplannerApp.controller('RoomSetupCtrl',function ($rootScope, $scope,$routePa
                 name: $scope.roomNameInput,
                 leader: $scope.room.leader,
                 jiras: $scope.room.jiras,
+                confirmed: -1
             }).then(function(data) {
                 if (data.data.nModified) {
                     alert('It worked!');
@@ -90,10 +91,11 @@ pokerplannerApp.controller('RoomSetupCtrl',function ($rootScope, $scope,$routePa
 
 });
 
-pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams,mongodbFactory) {
+pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams,$location,mongodbFactory) {
 
     $scope.focusIndex=0;
     $scope.players = [];
+    $scope.notes = [];
     $scope.cards = [
         { value: 0, display: '0' },
         { value: 1, display: '1' },
@@ -109,93 +111,134 @@ pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams
         { value: 999, display: '?' }
     ];
 
-    newTask();
+    function calculateAverage() {
+        var sum = 0;
+        for (var i=0;i<$scope.estimates.length;i++) {
+            sum = sum + $scope.estimates[i].estIndex;
+        }
+        return $scope.cards[Math.round(sum / $scope.estimates.length)].display;
+    }
+
+    function newTask() {
+        $scope.round=1;
+        $scope.showDeck=true;
+        $scope.show = false;
+        $scope.estimates= [];
+        $scope.currEstimate=0;
+        $scope.notes=$scope.room.jiras[$scope.focusIndex].notes;
+    };
+
+    function newRound() {
+        $scope.showDeck=true;
+        $scope.show = false;
+        $scope.estimates= [];
+    };
+    function setJiraDetails() {
+        $scope.jiraId = $scope.room.jiras[$scope.focusIndex].jiraId;
+        $scope.description = $scope.room.jiras[$scope.focusIndex].description;
+    };
+
 
     // get all room on Load
     mongodbFactory.getRoom($routeParams.id).then(function(data) {
-            $scope.room = data.data;
-            $scope.focusIndex = 0;
-            $scope.task = $scope.room.jiras[$scope.focusIndex];
+        $scope.room = data.data;
+        setJiraDetails();
+        $scope.focusIndex = 0;
+        newTask();
     });
 
-    // if user is running mozilla then use it's built-in WebSocket
-    window.WebSocket = window.WebSocket || window.MozWebSocket;
 
-    // if browser doesn't support WebSocket, just show some notification and exit
-    if (!window.WebSocket) {
-        content.html($('<p>', { text: 'Sorry, but your browser doesn\'t ' + 'support WebSockets.'} ));
-        return;
-    }
-    // open connection
-    var connection = new WebSocket('ws://127.0.0.1:1337');
-    connection.onopen = function () {
-        // first we want to register users names
-        connection.send('user:>'+$rootScope.nameInput);
-    };
+    if (angular.isUndefined($rootScope.nameInput)) {
+        //send user to start
+        $location.path('/');
+        $location.replace();
+    } else {
 
-    connection.onerror = function (error) {
-        // just in there were some problems with conenction...
-        content.html($('<p>', { text: 'Sorry, but there\'s some problem with your '
-                                    + 'connection or the server is down.' } ));
-    };
+        // if user is running mozilla then use it's built-in WebSocket
+        window.WebSocket = window.WebSocket || window.MozWebSocket;
 
-    // most important part - incoming messages
-    connection.onmessage = function (message) {
-        // try to parse JSON message. Because we know that the server always returns
-        // JSON this should work without any problem but we should make sure that
-        // the massage is not chunked or otherwise damaged.
-        try {
-            var json = JSON.parse(message.data);
-        } catch (e) {
-            console.log('This doesn\'t look like a valid JSON: ', message.data);
+        // if browser doesn't support WebSocket, just show some notification and exit
+        if (!window.WebSocket) {
+            content.html($('<p>', { text: 'Sorry, but your browser doesn\'t ' + 'support WebSockets.'} ));
             return;
         }
+        // open connection
+        var connection = new WebSocket('ws://127.0.0.1:1337');
+        connection.onopen = function () {
+            // first we want to register users names
+            connection.send('user:>'+$rootScope.nameInput);
+        };
 
-        // NOTE: if you're not sure about the JSON structure
-        // check the server source code above
-        if (json.type === 'users') {
-            $scope.players = json.data;
-            $scope.$apply();
-        } else if (json.type === 'est') {
-            var estObj = { user: json.data.user, estIndex: json.data.estIndex };
-            $scope.estimates.push(estObj);
-            $scope.$apply();
-        } else if (json.type === 'cmd') {
-            switch(json.data) {
-                case 'reveal':
-                    $scope.show = true;
-                    break;
-                case 'replay':
-                    newRound();
-                    $scope.round++;
-                    // save estimates to mongodb
-                    break;
-                case 'endTask':
-                    // save estimates
-                    newTask();
-                    if ($scope.focusIndex < $scope.room.jiras.length-1) {
-                        $scope.focusIndex++;
-                        $scope.task = $scope.room.jiras[$scope.focusIndex];
-                    }
-                    break;
-                default:
+        connection.onerror = function (error) {
+            // just in there were some problems with conenction...
+            content.html($('<p>', { text: 'Sorry, but there\'s some problem with your '
+                                        + 'connection or the server is down.' } ));
+        };
+
+        // most important part - incoming messages
+        connection.onmessage = function (message) {
+            // try to parse JSON message. Because we know that the server always returns
+            // JSON this should work without any problem but we should make sure that
+            // the massage is not chunked or otherwise damaged.
+            try {
+                var json = JSON.parse(message.data);
+            } catch (e) {
+                console.log('This doesn\'t look like a valid JSON: ', message.data);
+                return;
             }
-        } else if (json.type = 'task') {
-            reset();
-            $scope.focusIndex = json.data;
-            $scope.task = $scope.room.jiras[$scope.focusIndex];
-        } else if (json.type === 'note') {
-            $scope.notes.push(json.data);
-        } else {
-            console.log('Hmm..., I\'ve never seen JSON like this: ', json);
-        }
-    };
+
+            // NOTE: if you're not sure about the JSON structure
+            // check the server source code above
+            if (json.type === 'users') {
+                $scope.players = json.data;
+                $scope.$apply();
+            } else if (json.type === 'est') {
+                var estObj = { user: json.data.user, estIndex: json.data.estIndex };
+                $scope.estimates.push(estObj);
+                $scope.$apply();
+            } else if (json.type === 'cmd') {
+                switch(json.data) {
+                    case 'reveal':
+                        $scope.show = true;
+                        $scope.currEstimate = calculateAverage();
+                        $scope.$apply();
+                        break;
+                    case 'replay':
+                        newRound();
+                        $scope.round++;
+                        $scope.$apply();
+                        break;
+                    case 'endTask':
+                        if ($scope.focusIndex < $scope.room.jiras.length-1) {
+                            $scope.focusIndex++;
+                            setJiraDetails();
+                        }
+                        newTask();
+                        break;
+                    default:
+                }
+            } else if (json.type === 'task') {
+                newTask();
+                $scope.focusIndex = json.data;
+                setJiraDetails();
+                $scope.$apply();
+            } else if (json.type === 'note') {
+                var msg = json.data;
+                $scope.notes.push(msg);
+                $scope.$apply();
+            } else {
+                console.log('Hmm..., I\'ve never seen JSON like this: ', json);
+            }
+        };
+    }
 
     $scope.findPlayerEstimate = function (player) {
         for (var i=0; i<$scope.estimates.length; i++) {
             if (player === $scope.estimates[i].user) {
                 if ($scope.show || player===$rootScope.nameInput) {
                     return $scope.cards[$scope.estimates[i].estIndex].display;
+                } else {
+                    return '{Hidden}';
                 }
             }
         }
@@ -210,26 +253,46 @@ pokerplannerApp.controller('RoomCtrl', function ($rootScope, $scope,$routeParams
 
     $scope.changeTask=function(i) {
         $scope.focusIndex = i;
-        $scope.task = $scope.room.jiras[$scope.focusIndex];
+        setJiraDetails();
+        var header = 'task:>';
+        connection.send(header+i);
     };
 
     $scope.sendCmd=function(msg) {
+        if (msg === 'replay' || msg === 'endTask') {
+            for (i=0;i<$scope.estimates.length;i++){
+                var est = {estimate: $scope.cards[$scope.estimates[i].estIndex].display, round: $scope.round, user: $scope.estimates.user};
+                mongodbFactory.saveEstimate({
+                    roomIndex:$scope.room._id,
+                    jiraIndex:$scope.focusIndex,
+                    estimate:est
+                });
+            }
+            if ( msg === 'endTask') {
+                //save current estimate to DB
+                mongodbFactory.saveTaskEstimate({
+                    roomIndex: $scope.room._id,
+                    jiraIndex: $scope.focusIndex,
+                    confirmedEstimate: $scope.currEstimate
+                });
+            }
+        }
         var header = 'cmd:>';
         connection.send(header+msg);
     };
 
-    function newTask() {
-        $scope.round=1;
-        $scope.showDeck=true;
-        $scope.show = false;
-        $scope.estimates= [];
-        $scope.notes = [];
-    };
-
-    function newRound() {
-        $scope.showDeck=true;
-        $scope.show = false;
-        $scope.estimates= [];
+    $scope.sendNotes = function($event) {
+        if ($event.which == 13 && $scope.noteInput) { //Send on enter
+            var newNote = {note: $scope.noteInput, timestamp: new Date() };
+            mongodbFactory.saveNote({
+                roomIndex: $scope.room._id,
+                jiraIndex: $scope.focusIndex,
+                note: newNote
+            });
+            var header = 'note:>';
+            connection.send(header+JSON.stringify(newNote));
+            $scope.noteInput='';
+        }
     };
 });
 
